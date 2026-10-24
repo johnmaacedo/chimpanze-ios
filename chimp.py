@@ -1,6 +1,6 @@
 # Chimpanzé Downloader para iPhone (roda dentro do app a-Shell)
 # Uso: python3 ~/Documents/chimp.py "<opção>" "<link>"
-# Opções: "Vídeo (máxima)", "Vídeo 1080p", "Vídeo 720p", "Vídeo 480p", "Só o áudio", "Atualizar"
+# Opções: "Vídeo (máxima)", "Vídeo 1080p", "Vídeo 720p", "Vídeo 480p", "Atualizar"
 import os
 import re
 import shutil
@@ -80,11 +80,11 @@ def baixar(opcao, link):
     abrir("shortcuts://run-shortcut?name=" + ("Chimp%20Audio" if audio else "Chimp%20Video"))
 
 
-MENU = ["Vídeo (máxima)", "Vídeo 1080p", "Vídeo 720p", "Vídeo 480p", "Só o áudio", "Atualizar"]
+MENU = ["Vídeo (máxima)", "Vídeo 1080p", "Vídeo 720p", "Vídeo 480p", "Atualizar o Chimpanzé"]
 
 
 def perguntar():
-    print("\n🐒 Chimpanzé — o que você quer baixar?\n")
+    print("\n🐒 Chimpanzé — qual qualidade?\n")
     for i, item in enumerate(MENU, 1):
         print(f"  {i} - {item}")
     while True:
