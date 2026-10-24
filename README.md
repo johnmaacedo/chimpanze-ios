@@ -12,6 +12,7 @@ curl -L -o ~/Documents/chimp.py https://raw.githubusercontent.com/johnmaacedo/ch
 ## Uso manual
 
 ```
+python3 ~/Documents/chimp.py "https://..."   (mostra um menu)
 python3 ~/Documents/chimp.py "Vídeo (máxima)" "https://..."
 ```
 

@@ -80,10 +80,30 @@ def baixar(opcao, link):
     abrir("shortcuts://run-shortcut?name=" + ("Chimp%20Audio" if audio else "Chimp%20Video"))
 
 
+MENU = ["Vídeo (máxima)", "Vídeo 1080p", "Vídeo 720p", "Vídeo 480p", "Só o áudio", "Atualizar"]
+
+
+def perguntar():
+    print("\n🐒 Chimpanzé — o que você quer baixar?\n")
+    for i, item in enumerate(MENU, 1):
+        print(f"  {i} - {item}")
+    while True:
+        try:
+            n = int(input("\nDigite o número e aperte Enter: ").strip())
+            if 1 <= n <= len(MENU):
+                return MENU[n - 1]
+        except (ValueError, EOFError):
+            pass
+        print("Número inválido.")
+
+
 def main():
     if len(sys.argv) < 2:
-        print('Uso: python3 ~/Documents/chimp.py "Vídeo (máxima)" "https://..."')
+        print('Uso: python3 ~/Documents/chimp.py "https://..."')
         return
+    # Modo simples: só o link -> mostra o menu aqui mesmo
+    if len(sys.argv) == 2 and re.search(r"https?://", sys.argv[1]):
+        sys.argv = [sys.argv[0], perguntar(), sys.argv[1]]
     opcao = sys.argv[1]
     if "atualizar" in opcao.lower():
         atualizar()
