@@ -26,9 +26,11 @@ APPS = {  # para voltar ao app de onde o vídeo veio
 
 
 def salvar_na_galeria(link):
-    """Chama o atalho 'Chimp Video' (salva na galeria) e depois volta para o app de origem."""
+    """Roda o atalho Chimpanzé de novo, agora pelo app Atalhos, com o texto 'salvar'.
+    Os blocos finais dele (Get File + Salvar no Álbum) salvam o vídeo; depois volta ao app de origem."""
     from urllib.parse import quote
-    url = "shortcuts://x-callback-url/run-shortcut?name=Chimp%20Video"
+    url = ("shortcuts://x-callback-url/run-shortcut?name=" + quote("Chimpanzé", safe="") +
+           "&input=text&text=salvar")
     volta = next((v for k, v in APPS.items() if k in link.lower()), "")
     if volta:
         url += "&x-success=" + quote(volta, safe="")
@@ -121,6 +123,10 @@ def baixar(link):
 
 def main():
     texto = " ".join(sys.argv[1:]).strip()
+    if texto.lower() == "salvar":
+        # Segunda passada: o vídeo já está pronto; volta para o Atalhos terminar de salvar
+        os.system("open shortcuts://")
+        return
     if texto.lower() == "atualizar":
         atualizar()
         print("Pronto!")
