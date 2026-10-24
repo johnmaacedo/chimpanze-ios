@@ -25,6 +25,40 @@ def atualizar():
     voltar_para_atalhos()
 
 
+def codecs(arquivo):
+    import json
+    r = subprocess.run(["ffprobe", "-v", "error", "-show_streams", "-of", "json", arquivo],
+                       capture_output=True, text=True)
+    try:
+        streams = json.loads(r.stdout).get("streams", [])
+    except ValueError:
+        streams = []
+    v = next((s.get("codec_name", "") for s in streams if s.get("codec_type") == "video"), "")
+    a = next((s.get("codec_name", "") for s in streams if s.get("codec_type") == "audio"), "")
+    return v, a
+
+
+def preparar_para_galeria(arquivo):
+    """Deixa o MP4 no formato que a galeria aceita: HEVC marcado como hvc1 e áudio AAC."""
+    v, a = codecs(arquivo)
+    print(f"\nVídeo: {v or '?'} | Áudio: {a or 'sem áudio'}")
+    if v not in ("h264", "hevc"):
+        print("⚠️ Esse vídeo só existe num formato que a galeria do iPhone não aceita "
+              f"({v}). Tente a opção 1080p.")
+    saida = os.path.join(PASTA, "galeria.mp4")
+    cmd = ["ffmpeg", "-y", "-loglevel", "error", "-i", arquivo, "-map", "0:v:0", "-c:v", "copy"]
+    if v == "hevc":
+        cmd += ["-tag:v", "hvc1"]  # sem essa marca a galeria recusa vídeos HEVC (TikTok)
+    if a:
+        cmd += ["-map", "0:a:0"] + (["-c:a", "copy"] if a == "aac" else ["-c:a", "aac", "-b:a", "192k"])
+    cmd += ["-movflags", "+faststart", saida]
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode == 0 and os.path.exists(saida) and os.path.getsize(saida) > 0:
+        return saida
+    print("Aviso: não consegui ajustar o vídeo; salvando como veio.", (r.stderr or "")[-200:])
+    return arquivo
+
+
 def baixar(opcao, link):
     import yt_dlp
 
@@ -48,14 +82,14 @@ def baixar(opcao, link):
         final = "chimpanze.m4a"
     else:
         h = f"[height<={altura}]" if altura else ""
-        # Evita VP9 (o iPhone não salva VP9 na galeria); AV1, HEVC e H.264 funcionam
-        opts["format"] = (f"bestvideo{h}[vcodec!^=vp]+bestaudio[ext=m4a]/"
-                          f"bestvideo{h}[vcodec!^=vp]+bestaudio/"
-                          f"best{h}[vcodec!^=vp]/bestvideo{h}+bestaudio/best{h}/best")
-        # Mesma resolução: prefere H.264/HEVC (abre em qualquer lugar)
-        opts["format_sort"] = ["res", "fps", "vcodec:h265", "acodec:aac"]
+        # A galeria do iPhone só aceita H.264 ou HEVC. VP9/AV1 (YouTube acima de 1080p) ela recusa.
+        ok = "[vcodec~='^(avc|h264|hvc|hev|h265)']"
+        opts["format"] = (f"bestvideo{ok}{h}+bestaudio[acodec^=mp4a]/"
+                          f"bestvideo{ok}{h}+bestaudio/"
+                          f"best{ok}{h}/"
+                          f"bestvideo{h}+bestaudio/best{h}/best")
+        opts["format_sort"] = ["res", "fps"]
         opts["merge_output_format"] = "mp4"
-        opts["postprocessors"] = [{"key": "FFmpegVideoRemuxer", "preferedformat": "mp4"}]
         final = "chimpanze.mp4"
 
     with yt_dlp.YoutubeDL(opts) as ydl:
@@ -65,6 +99,8 @@ def baixar(opcao, link):
     if not gerados:
         raise RuntimeError("O download não gerou nenhum arquivo.")
     origem = os.path.join(PASTA, max(gerados, key=lambda f: os.path.getsize(os.path.join(PASTA, f))))
+    if not audio:
+        origem = preparar_para_galeria(origem)
 
     for d in SAIDAS:
         os.makedirs(d, exist_ok=True)
