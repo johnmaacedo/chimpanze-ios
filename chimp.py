@@ -17,8 +17,22 @@ FINAL = "chimpanze.mp4"
 COMPAT = "[vcodec~='^(avc|h264|hvc|hev|h265|bytevc1)']"
 
 
-def voltar_para_atalhos():
-    os.system("open shortcuts://")
+APPS = {  # para voltar ao app de onde o vídeo veio
+    "instagram.com": "instagram://", "instagr.am": "instagram://",
+    "tiktok.com": "tiktok://", "youtube.com": "youtube://", "youtu.be": "youtube://",
+    "x.com": "twitter://", "twitter.com": "twitter://", "facebook.com": "fb://",
+    "fb.watch": "fb://", "reddit.com": "reddit://",
+}
+
+
+def salvar_na_galeria(link):
+    """Chama o atalho 'Chimp Video' (salva na galeria) e depois volta para o app de origem."""
+    from urllib.parse import quote
+    url = "shortcuts://x-callback-url/run-shortcut?name=Chimp%20Video"
+    volta = next((v for k, v in APPS.items() if k in link.lower()), "")
+    if volta:
+        url += "&x-success=" + quote(volta, safe="")
+    os.system(f'open "{url}"')
 
 
 def atualizar():
@@ -132,8 +146,8 @@ def main():
             print("\n❌ NÃO DEU CERTO: " + str(e2))
             print("\n👉 Tire um print desta tela e mande para o Claude.")
             return
-    print("\n✅ Pronto! Voltando para salvar na galeria...")
-    voltar_para_atalhos()
+    print("\n✅ Pronto! Salvando na galeria...")
+    salvar_na_galeria(link)
 
 
 if __name__ == "__main__":
