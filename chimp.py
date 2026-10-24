@@ -13,6 +13,7 @@ DOCS = os.path.expanduser("~/Documents")
 PASTA = os.path.join(DOCS, "chimpanze_tmp")
 SAIDAS = [d for d in {os.environ.get("SHORTCUTS"), DOCS} if d]
 FINAL = "chimpanze.mp4"
+GUARDADOS = os.path.join(DOCS, "Chimpanze")  # aparece em Arquivos > No meu iPhone > a-Shell > Chimpanze
 # Codecs que a galeria do iPhone aceita
 COMPAT = "[vcodec~='^(avc|h264|hvc|hev|h265|bytevc1)']"
 
@@ -118,7 +119,12 @@ def baixar(link):
     for d in SAIDAS:
         os.makedirs(d, exist_ok=True)
         shutil.copyfile(origem, os.path.join(d, FINAL))
+    import time
+    os.makedirs(GUARDADOS, exist_ok=True)
+    guardado = os.path.join(GUARDADOS, time.strftime("video_%Y-%m-%d_%H-%M-%S.mp4"))
+    shutil.copyfile(origem, guardado)
     shutil.rmtree(PASTA, ignore_errors=True)
+    return guardado
 
 
 def main():
@@ -140,20 +146,21 @@ def main():
     print("🐒 Baixando: " + link + "\n")
     apagar_saidas()
     try:
-        baixar(link)
+        video = baixar(link)
     except Exception as e1:  # noqa: BLE001
         # As redes mudam com frequência: atualiza o motor e tenta mais uma vez
         print("\nPrimeira tentativa falhou (" + str(e1)[:200] + "). Atualizando e tentando de novo...")
         atualizar()
         try:
-            baixar(link)
+            video = baixar(link)
         except Exception as e2:  # noqa: BLE001
             apagar_saidas()
             print("\n❌ NÃO DEU CERTO: " + str(e2))
             print("\n👉 Tire um print desta tela e mande para o Claude.")
             return
-    print("\n✅ Pronto! Salvando na galeria...")
-    salvar_na_galeria(link)
+    print("\n✅ Pronto! Toque em \"Salvar Vídeo\" para mandar para a galeria.")
+    print("(O vídeo também fica em Arquivos > No meu iPhone > a-Shell > Chimpanze)")
+    os.system(f'open "{video}"')
 
 
 if __name__ == "__main__":
