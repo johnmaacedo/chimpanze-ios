@@ -12,9 +12,9 @@ PASTA = os.path.join(DOCS, "chimpanze_tmp")
 SAIDAS = [d for d in {os.environ.get("SHORTCUTS"), DOCS} if d]
 
 
-def abrir(url):
-    # Volta para o app Atalhos (ou chama o atalho que salva o arquivo)
-    os.system(f"open '{url}'")
+def voltar_para_atalhos():
+    # Volta para o app Atalhos, que continua o atalho e salva o vídeo na galeria
+    os.system("open shortcuts://")
 
 
 def atualizar():
@@ -22,7 +22,7 @@ def atualizar():
     subprocess.call([sys.executable, "-m", "pip", "install", "--user", "--upgrade",
                      "yt-dlp[default]", "yt-dlp-apple-webkit-jsi"])
     print("Pronto!")
-    abrir("shortcuts://")
+    voltar_para_atalhos()
 
 
 def baixar(opcao, link):
@@ -76,8 +76,8 @@ def baixar(opcao, link):
         shutil.copyfile(origem, os.path.join(d, final))
     shutil.rmtree(PASTA, ignore_errors=True)
 
-    print("\nPronto! Salvando...")
-    abrir("shortcuts://run-shortcut?name=" + ("Chimp%20Audio" if audio else "Chimp%20Video"))
+    print("\nPronto! Voltando para salvar na galeria...")
+    voltar_para_atalhos()
 
 
 MENU = ["Vídeo (máxima)", "Vídeo 1080p", "Vídeo 720p", "Vídeo 480p", "Atualizar o Chimpanzé"]
