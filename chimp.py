@@ -13,7 +13,9 @@ DOCS = os.path.expanduser("~/Documents")
 PASTA = os.path.join(DOCS, "chimpanze_tmp")
 SAIDAS = [d for d in {os.environ.get("SHORTCUTS"), DOCS} if d]
 FINAL = "chimpanze.mp4"
-GUARDADOS = os.path.join(DOCS, "Chimpanze")  # aparece em Arquivos > No meu iPhone > a-Shell > Chimpanze
+GUARDADOS = os.path.join(DOCS, "Chimpanze")
+# Opcional: cookies do Instagram (login) para Reels que o Instagram bloqueia sem login
+COOKIES = os.path.join(DOCS, "cookies.txt")  # Arquivos > No meu iPhone > a-Shell > cookies.txt
 # Codecs que a galeria do iPhone aceita
 COMPAT = "[vcodec~='^(avc|h264|hvc|hev|h265|bytevc1)']"
 
@@ -108,6 +110,8 @@ def baixar(link):
         "format_sort": ["res", "fps"],
         "merge_output_format": "mp4",
     }
+    if os.path.exists(COOKIES):
+        opts["cookiefile"] = COOKIES
     with yt_dlp.YoutubeDL(opts) as ydl:
         ydl.download([link])
 
@@ -148,15 +152,31 @@ def main():
     try:
         video = baixar(link)
     except Exception as e1:  # noqa: BLE001
-        # As redes mudam com frequência: atualiza o motor e tenta mais uma vez
-        print("\nPrimeira tentativa falhou (" + str(e1)[:200] + "). Atualizando e tentando de novo...")
-        atualizar()
+        erro = str(e1).lower()
+        if "cookies" in erro or "login" in erro or "empty media" in erro or "rate-limit" in erro:
+            # Bloqueio do site (geralmente Instagram): às vezes é passageiro, tenta mais uma vez
+            print("\nO site bloqueou o download. Tentando de novo em 3 segundos...")
+            import time
+            time.sleep(3)
+        else:
+            # As redes mudam com frequência: atualiza o motor e tenta mais uma vez
+            print("\nPrimeira tentativa falhou. Atualizando o motor e tentando de novo...")
+            atualizar()
         try:
             video = baixar(link)
         except Exception as e2:  # noqa: BLE001
             apagar_saidas()
-            print("\n❌ NÃO DEU CERTO: " + str(e2))
-            print("\n👉 Tire um print desta tela e mande para o Claude.")
+            erro = str(e2).lower()
+            if "cookies" in erro or "login" in erro or "empty media" in erro:
+                if os.path.exists(COOKIES):
+                    print("\n❌ O Instagram recusou mesmo com o seu login.")
+                    print("O arquivo cookies.txt provavelmente venceu: exporte de novo pelo PC.")
+                else:
+                    print("\n❌ O Instagram só libera esse vídeo para quem está logado.")
+                    print("Coloque o arquivo cookies.txt na pasta do a-Shell (veja as instruções do Claude).")
+            else:
+                print("\n❌ NÃO DEU CERTO: " + str(e2))
+                print("\n👉 Tire um print desta tela e mande para o Claude.")
             return
     print("\n✅ Pronto! Toque em \"Salvar Vídeo\" para mandar para a galeria.")
     print("(O vídeo também fica em Arquivos > No meu iPhone > a-Shell > Chimpanze)")
