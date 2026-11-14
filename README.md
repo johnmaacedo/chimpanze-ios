@@ -21,4 +21,8 @@ python3 ~/Documents/chimp.py atualizar
 
 ## 💚 Apoie / Support
 
-**Pix:** _em breve / coming soon_
+**Chave Pix / Pix key (aleatória / random):**
+
+```
+89209399-d0a0-44ba-98ce-794483f4f853
+```
