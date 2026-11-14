@@ -173,10 +173,10 @@ def main():
                     print("O arquivo cookies.txt provavelmente venceu: exporte de novo pelo PC.")
                 else:
                     print("\n❌ O Instagram só libera esse vídeo para quem está logado.")
-                    print("Coloque o arquivo cookies.txt na pasta do a-Shell (veja as instruções do Claude).")
+                    print("Coloque o arquivo cookies.txt na pasta do a-Shell.")
             else:
                 print("\n❌ NÃO DEU CERTO: " + str(e2))
-                print("\n👉 Tire um print desta tela e mande para o Claude.")
+                print("\n👉 Tire um print desta tela para pedir ajuda.")
             return
     print("\n✅ Pronto! Toque em \"Salvar Vídeo\" para mandar para a galeria.")
     print("(O vídeo também fica em Arquivos > No meu iPhone > a-Shell > Chimpanze)")
